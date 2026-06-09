@@ -21,7 +21,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("55bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(55, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
@@ -39,7 +39,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("56bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(56, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
@@ -64,7 +64,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("57bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(57, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
@@ -89,7 +89,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("64bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(64, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
@@ -115,7 +115,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("128bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(128, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
@@ -142,7 +142,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("200bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(200, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
@@ -180,7 +180,7 @@ TEST_CASE("DataFormatter") {
   }
 
   SECTION("248bytes") {
-    constexpr std::byte val = std::byte{0xf0};
+    constexpr auto val = std::byte{0xf0};
     const std::vector<std::byte> raw_data(248, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();

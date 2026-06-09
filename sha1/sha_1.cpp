@@ -11,6 +11,10 @@ void DataFormatter::AddData(std::span<const std::byte> raw_data) {
   last_blocks_.reserve(2);
   last_blocks_.resize(1);
 
+  if (raw_data.size() > std::numeric_limits<uint64_t>::max() - 1) [[unlikely]] {
+    throw std::length_error("[DataFormatter] data size too large");
+  }
+
   // create one data block for an empty message
   if (raw_data.empty()) {
     last_blocks_[0][0] = kPaddingByte;

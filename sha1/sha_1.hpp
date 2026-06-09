@@ -39,6 +39,12 @@ class DataFormatter {
  public:
   explicit DataFormatter(std::span<const std::byte> raw_data);
 
+  // delete constructor from rvalue vector
+  template <typename T>
+    requires(!std::is_same_v<std::span<const std::byte>, T> &&
+             !std::is_lvalue_reference_v<T>)
+  explicit DataFormatter(T &&raw_data) = delete;
+
   const VecBlocks &blocks() const & { return blocks_; }
 
  private:
