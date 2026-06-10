@@ -1,5 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_test_macros.hpp>
+#include <iomanip>
+#include <iostream>
 
 #include "sha1/sha_1.hpp"
 
@@ -22,7 +24,7 @@ TEST_CASE("DataFormatter") {
 
   SECTION("55bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(55, val);
+    const std::vector raw_data(55, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -35,12 +37,12 @@ TEST_CASE("DataFormatter") {
     REQUIRE(first_block[raw_data.size()] == sha1::kPaddingByte);
 
     REQUIRE(hash_lab::ReadBE<uint64_t>(first_block.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
   }
 
   SECTION("56bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(56, val);
+    const std::vector raw_data(56, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -60,12 +62,12 @@ TEST_CASE("DataFormatter") {
     // length must be 56 in second block
     const auto &second_block = blocks.at(1);
     REQUIRE(hash_lab::ReadBE<uint64_t>(second_block.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
   }
 
   SECTION("57bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(57, val);
+    const std::vector raw_data(57, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -85,12 +87,12 @@ TEST_CASE("DataFormatter") {
     // length must be 57 in second block
     const auto &second_block = blocks.at(1);
     REQUIRE(hash_lab::ReadBE<uint64_t>(second_block.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
   }
 
   SECTION("64bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(64, val);
+    const std::vector raw_data(64, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -111,12 +113,12 @@ TEST_CASE("DataFormatter") {
       null_bytes_of_second_block,
       [](const std::byte elem) { return elem == std::byte{0}; }));
     REQUIRE(hash_lab::ReadBE<uint64_t>(second_block.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
   }
 
   SECTION("128bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(128, val);
+    const std::vector raw_data(128, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -138,12 +140,12 @@ TEST_CASE("DataFormatter") {
       null_bytes_of_third_block,
       [](const std::byte elem) { return elem == std::byte{0}; }));
     REQUIRE(hash_lab::ReadBE<uint64_t>(third_block.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
   }
 
   SECTION("200bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(200, val);
+    const std::vector raw_data(200, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -176,12 +178,12 @@ TEST_CASE("DataFormatter") {
     }));
     // length
     REQUIRE(hash_lab::ReadBE<uint64_t>(block4.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
   }
 
   SECTION("248bytes") {
     constexpr auto val = std::byte{0xf0};
-    const std::vector<std::byte> raw_data(248, val);
+    const std::vector raw_data(248, val);
     const sha1::DataFormatter fmt(raw_data);
     const auto &blocks = fmt.blocks();
 
@@ -221,6 +223,101 @@ TEST_CASE("DataFormatter") {
 
     // length
     REQUIRE(hash_lab::ReadBE<uint64_t>(block5.subspan(
-              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size());
+              sha1::kBlockSize - sha1::kLengthSize)) == raw_data.size() * 8);
+  }
+}
+
+TEST_CASE("ReadBE") {
+  std::array<std::byte, 4> data{std::byte{0x01}, std::byte{0x23},
+                                std::byte{0x45}, std::byte{0x67}};
+  const auto value = hash_lab::ReadBE<uint32_t>(data);
+  REQUIRE(value == 0x01234567);
+}
+
+TEST_CASE("ConvertDataBlock") {
+  std::vector raw_data(sha1::kBlockSize, std::byte{0xfa});
+  auto block_words = sha1::CreateBlock80Words(sha1::DataBlock(raw_data));
+  auto first_16 = std::span(block_words.begin(), 16);
+  REQUIRE(std::ranges::all_of(
+    first_16, [](const uint32_t word) { return word == 0xfafafafa; }));
+}
+
+TEST_CASE("CreateBlock80Words for abc") {
+  std::array<std::byte, 64> block{};
+  block[0] = std::byte{'a'};   // 0x61
+  block[1] = std::byte{'b'};   // 0x62
+  block[2] = std::byte{'c'};   // 0x63
+  block[3] = std::byte{0x80};  // padding
+
+  block[60] = std::byte{0x00};
+  block[61] = std::byte{0x00};
+  block[62] = std::byte{0x00};
+  block[63] = std::byte{0x18};  // 24 = 0x18
+
+  auto W = sha1::CreateBlock80Words(block);
+
+  REQUIRE(W[0] == 0x61626380);
+
+  REQUIRE(W[15] == 0x00000018);
+}
+
+TEST_CASE("MagicFunc") {
+  constexpr uint32_t b = 0xEFCDAB89;
+  constexpr uint32_t c = 0x98BADCFE;
+  constexpr uint32_t d = 0x10325476;
+
+  const uint32_t f20 = sha1::MagicFunc(20, b, c, d);
+  REQUIRE(f20 == (b ^ c ^ d));
+
+  const uint32_t f40 = sha1::MagicFunc(40, b, c, d);
+  REQUIRE(f40 == ((b & c) | (b & d) | (c & d)));
+}
+
+TEST_CASE("CircularLeftShift") {
+  constexpr uint32_t word = 0x80000000;  // 1000...0000
+  const uint32_t shifted = sha1::CircularLeftShift(word, 1);
+  REQUIRE(shifted == 0x00000001);  // 0000...0001
+}
+
+TEST_CASE("GetK") {
+  REQUIRE(sha1::GetK(0) == 0x5A827999UL);
+  REQUIRE(sha1::GetK(19) == 0x5A827999UL);
+  REQUIRE(sha1::GetK(20) == 0x6ED9EBA1UL);
+  REQUIRE(sha1::GetK(39) == 0x6ED9EBA1UL);
+  REQUIRE(sha1::GetK(40) == 0x8F1BBCDCUL);
+  REQUIRE(sha1::GetK(59) == 0x8F1BBCDCUL);
+  REQUIRE(sha1::GetK(60) == 0xCA62C1D6UL);
+  REQUIRE(sha1::GetK(79) == 0xCA62C1D6UL);
+}
+
+void PrintHex(std::span<const std::byte> data) {
+  for (const auto byte : data) {
+    std::cout << std::hex << std::setw(2) << std::setfill('0')
+              << static_cast<int>(byte) << ' ';
+  }
+  std::cout << std::endl;
+}
+
+TEST_CASE("SHA1") {
+  SECTION("abc") {
+    const sha1::Sha1 sha{"abc"};
+    const auto result = sha.Calculate();
+    PrintHex(result);
+    constexpr std::array<uint8_t, 20> expected{
+      0xA9, 0x99, 0x3E, 0x36, 0x47, 0x06, 0x81, 0x6A, 0xBA, 0x3E,
+      0x25, 0x71, 0x78, 0x50, 0xC2, 0x6C, 0x9C, 0xD0, 0xD8, 0x9D};
+
+    REQUIRE(std::ranges::equal(std::as_bytes(std::span(expected)), result));
+  }
+
+  SECTION("abc") {
+    const sha1::Sha1 sha{""};
+    const auto result = sha.Calculate();
+    PrintHex(result);
+    constexpr std::array<uint8_t, 20> expected{
+      0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55,
+      0xbf, 0xef, 0x95, 0x60, 0x18, 0x90, 0xaf, 0xd8, 0x07, 0x09};
+
+    REQUIRE(std::ranges::equal(std::as_bytes(std::span(expected)), result));
   }
 }

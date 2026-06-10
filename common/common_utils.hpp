@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <bit>
 #include <concepts>
+#include <cstring>
 #include <ranges>
 #include <stdexcept>
 
@@ -36,18 +37,28 @@ void WriteBE(std::span<std::byte> dest, T value) {
 }
 
 template <std::integral T>
-T ReadBE(std::span<const std::byte> src) {
+T ReadBE(const std::span<const std::byte> src) {
   static_assert(std::has_unique_object_representations_v<T>,
                 "T may not have padding bits");
   if (sizeof(T) > src.size()) [[unlikely]] {
     throw std::length_error("[ReadBE] src is too small");
   }
   std::array<std::byte, sizeof(T)> val_raw;
-  std::ranges::copy(src, val_raw.begin());
+  std::ranges::copy_n(src.begin(), sizeof(T), val_raw.begin());
   if constexpr (std::endian::native == std::endian::little) {
     std::ranges::reverse(val_raw);
   }
   return std::bit_cast<T>(val_raw);
+}
+
+template <std::integral T>
+T ReadAs(const std::span<const std::byte> src) {
+  if (sizeof(T) > src.size()) [[unlikely]] {
+    throw std::length_error("[ReadBE] src is too small");
+  }
+  T result;
+  std::memcpy(&result, src.data(), sizeof(T));
+  return result;
 }
 
 }  // namespace hash_lab
