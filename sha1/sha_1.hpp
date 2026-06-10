@@ -81,6 +81,8 @@ class Sha1 {
 
 Block80Words CreateBlock80Words(DataBlock data_block);
 
+Block80Words CreateBlock80WordsEx(const DataBlock data_block);
+
 [[nodiscard]] uint32_t MagicFunc(uint32_t step, uint32_t b, uint32_t c,
                                  uint32_t d);
 

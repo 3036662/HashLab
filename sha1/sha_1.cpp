@@ -129,7 +129,7 @@ std::array<std::byte, 20> Sha1::Calculate() const {
     uint32_t& C = buff1[2];
     uint32_t& D = buff1[3];
     uint32_t& E = buff1[4];
-    Block80Words block80_w_words = CreateBlock80Words(data_block);
+    Block80Words block80_w_words = CreateBlock80WordsEx(data_block);
     // perform 80 steps
     for (size_t step = 0; step < kTotalSteps; ++step) {
       // TEMP = S^5(A) + f(t;B,C,D) + E + W(t) + K(t);
@@ -172,6 +172,27 @@ Block80Words CreateBlock80Words(const DataBlock data_block) {
       CircularLeftShift(res[word_index - 3] ^ res[word_index - 8] ^
                           res[word_index - 14] ^ res[word_index - 16],
                         1);
+  }
+  return res;
+}
+
+// optimized version
+Block80Words CreateBlock80WordsEx(const DataBlock data_block) {
+  Block80Words res;
+  // copy 16 words
+  std::memcpy(res.data(), data_block.data(), 64);
+  // 16 words reverse
+  if constexpr (std::endian::native == std::endian::little) {
+    auto* bytes = reinterpret_cast<uint8_t*>(res.data());
+    for (size_t i = 0; i < 16; ++i) {
+      std::reverse(bytes + i * 4, bytes + i * 4 + 4);
+    }
+  }
+  // the rest 64 words
+  for (size_t word_index = 16; word_index < 80; ++word_index) {
+    res[word_index] = std::rotl(res[word_index - 3] ^ res[word_index - 8] ^
+                                  res[word_index - 14] ^ res[word_index - 16],
+                                1);
   }
   return res;
 }
