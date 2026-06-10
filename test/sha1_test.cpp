@@ -290,19 +290,11 @@ TEST_CASE("GetK") {
   REQUIRE(sha1::GetK(79) == 0xCA62C1D6UL);
 }
 
-void PrintHex(std::span<const std::byte> data) {
-  for (const auto byte : data) {
-    std::cout << std::hex << std::setw(2) << std::setfill('0')
-              << static_cast<int>(byte) << ' ';
-  }
-  std::cout << std::endl;
-}
-
 TEST_CASE("SHA1") {
   SECTION("abc") {
     const sha1::Sha1 sha{"abc"};
     const auto result = sha.Calculate();
-    PrintHex(result);
+    hash_lab::PrintHex(result);
     constexpr std::array<uint8_t, 20> expected{
       0xA9, 0x99, 0x3E, 0x36, 0x47, 0x06, 0x81, 0x6A, 0xBA, 0x3E,
       0x25, 0x71, 0x78, 0x50, 0xC2, 0x6C, 0x9C, 0xD0, 0xD8, 0x9D};
@@ -313,7 +305,7 @@ TEST_CASE("SHA1") {
   SECTION("abc") {
     const sha1::Sha1 sha{""};
     const auto result = sha.Calculate();
-    PrintHex(result);
+    hash_lab::PrintHex(result);
     constexpr std::array<uint8_t, 20> expected{
       0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55,
       0xbf, 0xef, 0x95, 0x60, 0x18, 0x90, 0xaf, 0xd8, 0x07, 0x09};

@@ -5,8 +5,13 @@
 #include <bit>
 #include <concepts>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <optional>
 #include <ranges>
 #include <stdexcept>
+#include <vector>
 
 namespace hash_lab {
 
@@ -59,6 +64,40 @@ T ReadAs(const std::span<const std::byte> src) {
   T result;
   std::memcpy(&result, src.data(), sizeof(T));
   return result;
+}
+
+inline std::optional<std::vector<std::byte>> FileToVector(
+  const std::string& path) noexcept {
+  namespace fs = std::filesystem;
+  if (path.empty() || !fs::exists(path) || !fs::is_regular_file(path))
+    [[unlikely]] {
+    return std::nullopt;
+  }
+  std::ifstream file(path, std::ios_base::binary);
+  if (!file.is_open()) [[unlikely]] {
+    return std::nullopt;
+  }
+  std::vector<std::byte> res;
+  res.reserve(std::filesystem::file_size(path));
+  try {
+    for (auto it = std::istreambuf_iterator<char>(file);
+         it != std::istreambuf_iterator<char>(); ++it) {
+      res.push_back(static_cast<std::byte>(*it));
+    }
+  } catch ([[maybe_unused]] const std::exception& /*ex*/) {
+    file.close();
+    return std::nullopt;
+  }
+  file.close();
+  return res;
+}
+
+inline void PrintHex(std::span<const std::byte> data) {
+  for (const auto byte : data) {
+    std::cout << std::hex << std::setw(2) << std::setfill('0')
+              << static_cast<int>(byte) << ' ';
+  }
+  std::cout << std::endl;
 }
 
 }  // namespace hash_lab

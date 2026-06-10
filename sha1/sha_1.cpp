@@ -76,16 +76,16 @@ void DataFormatter::AppendLastBlocks() {
 }
 
 //  S^n(X)  =  (X << n) OR (X >> 32-n).
-[[nodiscard]] inline uint32_t CircularLeftShift(const uint32_t word,
-                                                const uint32_t shift) {
+[[nodiscard]] uint32_t CircularLeftShift(const uint32_t word,
+                                         const uint32_t shift) {
   if (shift >= 32) [[unlikely]] {
     throw std::runtime_error("[CircularLeftShift] shift too large");
   }
   return std::rotl(word, shift);
 }
 
-[[nodiscard]] inline uint32_t MagicFunc(const uint32_t step, const uint32_t b,
-                                        const uint32_t c, const uint32_t d) {
+[[nodiscard]] uint32_t MagicFunc(const uint32_t step, const uint32_t b,
+                                 const uint32_t c, const uint32_t d) {
   if (step <= 19) {
     return (b & c) | (~b & d);
   }
@@ -101,7 +101,7 @@ void DataFormatter::AppendLastBlocks() {
   throw std::runtime_error("[MagicFunc] step too large");
 }
 
-[[nodiscard]] inline uint32_t GetK(const uint32_t step) {
+[[nodiscard]] uint32_t GetK(const uint32_t step) {
   if (step <= 19) return k0_19;
   if (step <= 39) return k20_39;
   if (step <= 59) return k40_59;

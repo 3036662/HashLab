@@ -1,6 +1,7 @@
 {
   "dependencies": [
-    "catch2"
+    "catch2",
+    "mio"
   ],
   "version-string": "0.1",
   "name": "hash-lab"
