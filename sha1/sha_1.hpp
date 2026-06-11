@@ -1,11 +1,9 @@
 #ifndef HASH_LAB_SHA_1_HPP
 #define HASH_LAB_SHA_1_HPP
 #include <array>
-#include <cstdint>
-#include <ostream>
-#include <vector>
 
 #include "common/common_utils.hpp"
+#include "common/data_formatter.hpp"
 
 namespace hash_lab::sha1 {
 
@@ -23,38 +21,6 @@ constexpr uint32_t k0_19 = 0x5A827999UL;
 constexpr uint32_t k20_39 = 0x6ED9EBA1UL;
 constexpr uint32_t k40_59 = 0x8F1BBCDCUL;
 constexpr uint32_t k60_79 = 0xCA62C1D6UL;
-
-// Data block (512 bits)
-constexpr size_t kBlockSize = 64;
-constexpr size_t kLengthSize = 8;
-constexpr std::byte kPaddingByte{0b10000000};
-using DataBlock = std::span<const std::byte, kBlockSize>;
-using DataBlockOwning = std::array<std::byte, kBlockSize>;
-using VecBlocks = std::vector<DataBlock>;
-
-/// @brief DataFormatter will prepare a data for hashing
-/// @details does not own the data
-class DataFormatter {
- public:
-  explicit DataFormatter(std::span<const std::byte> raw_data);
-
-  // delete constructor from rvalue vector
-  template <typename T>
-    requires(!std::is_same_v<std::span<const std::byte>, T> &&
-             !std::is_lvalue_reference_v<T>)
-  explicit DataFormatter(T &&raw_data) = delete;
-
-  [[nodiscard]] const VecBlocks &blocks() const & { return blocks_; }
-
- private:
-  void AddData(std::span<const std::byte> raw_data);
-  void CreateLastBlocks(std::span<const std::byte> data_tail,
-                        size_t msg_total_size);
-  void AppendLastBlocks();
-
-  std::vector<DataBlock> blocks_;
-  std::vector<DataBlockOwning> last_blocks_;
-};
 
 using Buffer5Words = std::array<std::uint32_t, 5>;
 using Block80Words = std::array<std::uint32_t, 80>;

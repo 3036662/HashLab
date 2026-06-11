@@ -11,7 +11,7 @@ find_package(Catch2 CONFIG REQUIRED)
 
 add_executable(sha1_file sha1_file.cpp)
 
-target_link_libraries(sha1_file sha1)
+target_link_libraries(sha1_file sha1 sha_utils)
 message(STATUS "VCPKG_INSTALLED_DIR: ${VCPKG_INSTALLED_DIR}")
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
@@ -35,5 +35,6 @@ else ()
 endif ()
 target_include_directories(sha1_file PRIVATE ${MIO_INCLUDE_DIR})
 
+add_subdirectory(common)
 add_subdirectory(sha1)
 add_subdirectory(test)
