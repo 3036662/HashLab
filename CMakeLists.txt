@@ -10,8 +10,12 @@ include_directories(${CMAKE_SOURCE_DIR})
 find_package(Catch2 CONFIG REQUIRED)
 
 add_executable(sha1_file sha1_file.cpp)
-
 target_link_libraries(sha1_file sha1 sha_utils)
+
+add_executable(sha256_file sha256_file.cpp)
+target_link_libraries(sha256_file sha256 sha_utils)
+
+
 message(STATUS "VCPKG_INSTALLED_DIR: ${VCPKG_INSTALLED_DIR}")
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
@@ -34,6 +38,7 @@ else ()
     SET(MIO_INCLUDE_DIR third_party/mio/include)
 endif ()
 target_include_directories(sha1_file PRIVATE ${MIO_INCLUDE_DIR})
+target_include_directories(sha256_file PRIVATE ${MIO_INCLUDE_DIR})
 
 add_subdirectory(common)
 add_subdirectory(sha1)

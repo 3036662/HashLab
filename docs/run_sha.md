@@ -27,10 +27,18 @@ dd if=/dev/urandom of=2GB.bin bs=1M count=2048 2>/dev/null
 ./openssl sha1 2GB.bin
 ```
 
-## Bench
+## Bench SHA1
 
 ```bash
 hyperfine --warmup 3 --runs 10 \
   -n "My SHA-1"   './sha1_file 2GB.bin > /dev/null' \
   -n "OpenSSL"    'openssl sha1 -binary 2GB.bin > /dev/null'
+```
+
+## Bench SHA256
+
+```bash
+hyperfine --warmup 3 --runs 10 \
+  -n "My SHA-1"   './sha256_file 2GB.bin > /dev/null' \
+  -n "OpenSSL"    'openssl sha256 -binary 2GB.bin > /dev/null'
 ```
