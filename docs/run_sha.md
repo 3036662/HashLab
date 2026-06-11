@@ -39,6 +39,22 @@ hyperfine --warmup 3 --runs 10 \
 
 ```bash
 hyperfine --warmup 3 --runs 10 \
-  -n "My SHA-1"   './sha256_file 2GB.bin > /dev/null' \
+  -n "My SHA-256"   './sha256_file 2GB.bin > /dev/null' \
   -n "OpenSSL"    'openssl sha256 -binary 2GB.bin > /dev/null'
 ```
+
+```bash
+hyperfine --warmup 3 --runs 10 \
+  -n "My SHA-256"   './sha256_file 2GB.bin > /dev/null' \
+  -n "OpenSSL (software)"   'env OPENSSL_ia32cap="~0x2200000000000000" openssl sha256 -binary 2GB.bin > /dev/null' \
+  -n "OpenSSL (pure soft)" 'env OPENSSL_ia32cap="0" openssl sha256 -binary 2GB.bin > /dev/null' \
+  -n "OpenSSL (SHA-NI)"   'openssl sha256 -binary 2GB.bin > /dev/null'
+```
+
+## Ryzen 7 7700
+
+![img.png](sha-256_ryzen7_7700.png)
+
+## Ryzen 9 8945hx
+
+![img.png](ryzen_9_8945hx.png)
