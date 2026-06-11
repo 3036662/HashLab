@@ -310,7 +310,7 @@ TEST_CASE("SHA1") {
     REQUIRE(std::ranges::equal(std::as_bytes(std::span(expected)), result));
   }
 
-  SECTION("abc") {
+  SECTION("empty") {
     const sha1::Sha1 sha{""};
     const auto result = sha.Calculate();
     hash_lab::PrintHex(result);

@@ -37,4 +37,5 @@ target_include_directories(sha1_file PRIVATE ${MIO_INCLUDE_DIR})
 
 add_subdirectory(common)
 add_subdirectory(sha1)
+add_subdirectory(sha256)
 add_subdirectory(test)
