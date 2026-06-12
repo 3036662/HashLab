@@ -1,15 +1,9 @@
 #include <iostream>
 #include <mio/mmap.hpp>
-
-#include "common/common_utils.hpp"
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon
-// src="AllIcons.Actions.Execute"/> icon in the gutter.
-
-#include <fstream>
-#include <iostream>
 #include <vector>
 
-#include "sha256/sha_256.hpp"
+#include "../sha1/sha_1.hpp"
+#include "common/common_utils.hpp"
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
@@ -29,8 +23,8 @@ int main(int argc, char* argv[]) {
     reinterpret_cast<const std::byte*>(mmap.data()), mmap.size());
 
   // Calculate SHA-1
-  const hash_lab::sha256::Sha256 sha256{std::span(file_data)};
-  const auto hash = sha256.Calculate();
+  const hash_lab::sha1::Sha1 sha{std::span(file_data)};
+  const auto hash = sha.Calculate();
   hash_lab::PrintHex(hash);
 
   return 0;

@@ -7,21 +7,6 @@
 
 namespace hash_lab::sha1 {
 
-constexpr size_t kTotalSteps = 80;
-
-// H's initializers
-constexpr uint32_t kH0 = 0x67452301UL;
-constexpr uint32_t kH1 = 0xEFCDAB89UL;
-constexpr uint32_t kH2 = 0x98BADCFEUL;
-constexpr uint32_t kH3 = 0x10325476UL;
-constexpr uint32_t kH4 = 0xC3D2E1F0UL;
-
-// K constants
-constexpr uint32_t k0_19 = 0x5A827999UL;
-constexpr uint32_t k20_39 = 0x6ED9EBA1UL;
-constexpr uint32_t k40_59 = 0x8F1BBCDCUL;
-constexpr uint32_t k60_79 = 0xCA62C1D6UL;
-
 using Buffer5Words = std::array<std::uint32_t, 5>;
 using Block80Words = std::array<std::uint32_t, 80>;
 

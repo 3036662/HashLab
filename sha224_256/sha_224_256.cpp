@@ -1,9 +1,9 @@
 
-#include "sha_256.hpp"
+#include "sha_224_256.hpp"
 
 #include "common/common_utils.hpp"
 
-namespace hash_lab::sha256 {
+namespace hash_lab::sha224_256 {
 
 using Block64Words = std::array<std::uint32_t, 64>;
 using Buffer8Words = std::array<std::uint32_t, 8>;
@@ -26,6 +26,10 @@ constexpr std::array<uint32_t, 64> kKCube{
 constexpr std::array<uint32_t, 8> kSha256InitialH{
   0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
   0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+
+constexpr std::array<uint32_t, 8> kSha224InitialH{
+  0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
+  0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4};
 
 // SSIG0(x) = ROTR^7(x) XOR ROTR^18(x) XOR SHR^3(x)
 [[nodiscard]] constexpr uint32_t SSig0(uint32_t x) {
@@ -77,7 +81,8 @@ Block64Words CreateBlock64Words(const DataBlock data_block) {
   return res;
 }
 
-std::array<std::byte, 32> Sha256::Calculate() const {
+template <int SHA_TYPE>
+Sha224_256<SHA_TYPE>::Ret Sha224_256<SHA_TYPE>::Calculate() const {
   // The words of the message schedule are labeled W0, W1, ..., W63
 
   // The eight working variables are labeled a, b, c, d, e, f, g, and h.
@@ -89,7 +94,8 @@ std::array<std::byte, 32> Sha256::Calculate() const {
   // 512-bit blocks that are considered to be composed of sixteen 32-bit words
   // M(i)0, M(i)1, ..., M(i)15
 
-  Buffer8Words buff_h{kSha256InitialH};
+  Buffer8Words buff_h = SHA_TYPE == 256 ? kSha256InitialH : kSha224InitialH;
+  
   uint32_t& H0 = buff_h[0];
   uint32_t& H1 = buff_h[1];
   uint32_t& H2 = buff_h[2];
@@ -108,12 +114,12 @@ std::array<std::byte, 32> Sha256::Calculate() const {
     uint32_t& F = buff1[5];
     uint32_t& G = buff1[6];
     uint32_t& H = buff1[7];
-    const Block64Words block80_w_words = CreateBlock64Words(data_block);
+    const Block64Words block64_w_words = CreateBlock64Words(data_block);
     // 64 steps
     for (size_t step = 0; step < kTotalSteps; ++step) {
       // T1 = h + BSIG1(e) + CH(e,f,g) + Kt + Wt
       const uint32_t temp1 =
-        H + BSig1(E) + Ch(E, F, G) + kKCube[step] + block80_w_words[step];
+        H + BSig1(E) + Ch(E, F, G) + kKCube[step] + block64_w_words[step];
       // T2 = BSIG0(a) + MAJ(a,b,c)
       const uint32_t temp2 = BSig0(A) + Maj(A, B, C);
       H = G;
@@ -134,12 +140,16 @@ std::array<std::byte, 32> Sha256::Calculate() const {
     H6 += G;
     H7 += H;
   }
-  std::array<std::byte, 32> res;
-  for (size_t word_index = 0; word_index < 8; ++word_index) {
+  Ret res{};
+  constexpr size_t kNUsedWords = SHA_TYPE == 256 ? 8 : 7;
+  for (size_t word_index = 0; word_index < kNUsedWords; ++word_index) {
     WriteBE(std::span(res.begin() + word_index * sizeof(uint32_t), 4),
             buff_h[word_index]);
   }
   return res;
 }
 
-}  // namespace hash_lab::sha256
+template class Sha224_256<256>;
+template class Sha224_256<224>;
+
+}  // namespace hash_lab::sha224_256

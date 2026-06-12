@@ -1,1 +1,0 @@
-add_library(sha256 STATIC sha_256.cpp sha_256.hpp)
